@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello Vue!</title>
+    <!-- including Vue with development version CDN -->
+    <script src="vue-2.6.14.js"></script>
+
+    <style>
+      .checked {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <h1>{{ message }}</h1>
+      <parent :child-value="child1Model">
+        <child1 v-model="child1Model"></child1>
+        <child2></child2>
+      </parent>
+    </div>
+
+    <script type="text/x-template" id="parent">
+      <div>
+        <h2>parent {{ childValue }}</h2>
+
+        <button :class="{checked: checked}" @click="check">check</button>
+        <button @click="change">change</button>
+
+        <innerView v-if="showBox" v-model="model" />
+
+        <slot></slot>
+      </div>
+    </script>
+
+    <script type="text/x-template" id="child1">
+      <h3>child 1 <button @click="change">change</button> {{value}}</h3>
+    </script>
+
+    <script type="text/x-template" id="child2">
+      <h3>child 2 <button @click="change">change</button> {{childModel}}</h3>
+    </script>
+
+    <script type="text/x-template" id="innerView">
+      <h3>innerView {{ value }} {{ local }} <button @click="emit">emit</button></h3>
+    </script>
+
+    <script>
+      Vue.component("parent", {
+        template: "#parent",
+        data() {
+          return { checked: false, showBox: true, model: 10 };
+        },
+        props: ['childValue'],
+        methods: {
+          check() {
+            printGap();
+            this.checked = !this.checked;
+          },
+          change() {
+            printGap();
+            this.model = 20;
+          },
+        },
+        mounted() {
+          setTimeout(() => {
+            printGap();
+            this.showBox = false;
+
+            setTimeout(() => {
+              printGap();
+              this.showBox = true;
+            }, 1000);
+          }, 2000);
+        },
+      });
+
+      Vue.component("child1", {
+        template: "#child1",
+        data() {
+          return { childProp: false };
+        },
+        props: ['value'],
+        methods: {
+          change() {
+            printGap();
+            this.$emit('input', 1200);
+          }
+        }
+      });
+
+      Vue.component("child2", {
+        template: "#child2",
+        data() {
+          return { childProp: false, childModel: 20 };
+        },
+        methods: {
+          change() {
+            printGap();
+            this.childModel = 30;
+          }
+        }
+      });
+
+      Vue.component("innerView", {
+        template: "#innerView",
+        data() {
+          return { childProp: false, local: 10 };
+        },
+        props: {
+          value: {
+            type: Number,
+            default: 0
+          }
+        },
+        methods: {
+          emit() {
+            printGap();
+            this.local = 20;
+            this.$emit("input", 2);
+          },
+        },
+      });
+
+      new Vue({
+        el: "#app",
+        data: {
+          message: "Hello",
+          child1Model: 100
+        },
+        mounted() {
+          setTimeout(() => {
+            printGap();
+            this.message = "Hello World";
+          }, 1000);
+        },
+      });
+    </script>
+  </body>
+</html>
